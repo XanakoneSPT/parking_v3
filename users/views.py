@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.decorators import api_view
+from quan_tri_vien.models import QuanTriVien
 
 
 class SinhVienViewSet(viewsets.ModelViewSet):
@@ -54,22 +55,45 @@ class NapTienAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @api_view(['POST'])
 def login(request):
-    username = request.data.get('ma_sv')
+    user_id = request.data.get('ma_sv')
     password = request.data.get('password')
     
-    if username == 'admin' and password == 'admin':
-        return Response({"Message": "Đăng nhập thành công."}, status=status.HTTP_200_OK)
+    # Kiểm tra xem có phải đang đăng nhập với tư cách quản trị viên không
+    if user_id and user_id.lower().startswith('qtv'):
+        try:
+            quan_tri_vien = QuanTriVien.objects.get(ma_qtv=user_id)
+            if quan_tri_vien.mat_khau == password:
+                return Response({
+                    "message": "Đăng nhập thành công.",
+                    "user_type": "admin",
+                    "user_info": {
+                        "ma_qtv": quan_tri_vien.ma_qtv,
+                        "ho_ten": quan_tri_vien.ho_ten,
+                        "vai_tro": quan_tri_vien.vai_tro
+                    }
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Mật khẩu không đúng."}, status=status.HTTP_400_BAD_REQUEST)
+        except QuanTriVien.DoesNotExist:
+            return Response({"error": "Mã quản trị viên không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
 
-    if not username or not password:
-        return Response({"error": "Vui lòng cung cấp tên đăng nhập và mật khẩu."}, status=status.HTTP_400_BAD_REQUEST)
+    # Xử lý đăng nhập cho sinh viên
+    if not user_id or not password:
+        return Response({"error": "Vui lòng cung cấp mã người dùng và mật khẩu."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        sinhVien = SinhVien.objects.get(ma_sv=username)
-    except sinhVien.DoesNotExist:
-        return Response({"error": "Mã sinh viên không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
-
-    if sinhVien.mat_khau != password:
-        return Response({"error": "Mật khẩu không đúng."}, status=status.HTTP_400_BAD_REQUEST)
-
-
-    return Response({"Message": "Đăng nhập thành công."}, status=status.HTTP_200_OK)
+        sinh_vien = SinhVien.objects.get(ma_sv=user_id)
+        if sinh_vien.mat_khau != password:
+            return Response({"error": "Mật khẩu không đúng."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({
+            "message": "Đăng nhập thành công.",
+            "user_type": "student",
+            "user_info": {
+                "ma_sv": sinh_vien.ma_sv,
+                "ho_ten": sinh_vien.ho_ten,
+                "so_du": sinh_vien.so_tien_hien_co
+            }
+        }, status=status.HTTP_200_OK)
+    except SinhVien.DoesNotExist:
+        return Response({"error": "Mã sinh viên không tồn tại."}, status=status.HTTP_404_NOT_FOUND)

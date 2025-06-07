@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from stream.views import camera_feed
+from stream.views import camera_feed,camera_feed_2
 from users.views import NapTienAPIView
 from users.views import login
 
@@ -27,7 +27,8 @@ urlpatterns = [
     path("api_quan_tri_vien/", include("quan_tri_vien.urls")),
     path("connect_esp8266/",include("connect_esp8266.urls")),
     path('video_feed/', camera_feed, name='video_feed'),
+    path('video_feed_2/', camera_feed_2, name='video_feed_2'),
     path('api_nap_tien/', NapTienAPIView.as_view(), name='nap_tien'),
     path('api_login/', login, name='login'),
-    
+
 ]

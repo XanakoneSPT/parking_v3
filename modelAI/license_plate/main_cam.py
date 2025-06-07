@@ -77,7 +77,7 @@ def detect(model, image, device, imgsz=640, conf_thres=0.25,
                 plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
 
         # Print time (inference + NMS)
-        print(f'Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
+        # print(f'Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
         print('Number of License Plate:', len(det))
 
         # cv2.imshow('Detected license plates', cv2.resize(im0, dsize=None, fx=0.5, fy=0.5))
@@ -118,7 +118,7 @@ def dectectPlate():
     save_dir = "captured_images"
     os.makedirs(save_dir, exist_ok=True)
 
-    LP_weights = 'D:/Documents/src_py/PBL5/smart_parking/modelAI/license_plate/best_yolo7.pt'
+    LP_weights = './weights/best_yolo7.pt'
 
     # Kiểm tra thiết bị
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

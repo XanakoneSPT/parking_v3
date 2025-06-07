@@ -2,16 +2,32 @@ from ultralytics import YOLO
 import cv2
 import threading
 import time
+import logging
+import os
+import sys
+from contextlib import contextmanager
 
+# Configure logging to be minimal
+logging.getLogger("ultralytics").setLevel(logging.WARNING)
 
-model = YOLO("D:/Documents/src_py/PBL5/smart_parking/modelAI/empty_space/runs/detect/train/weights/best.pt") 
+# Initialize model with silent mode
+model = YOLO("./weights/best.pt", verbose=False)
+model.conf = 0.25  # confidence threshold
+model.iou = 0.45  # NMS IoU threshold
 
-
-
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
 
 def scanEmptySpace():
     # đọc ảnh
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         raise IOError("Không thể mở camera")
 
@@ -21,7 +37,9 @@ def scanEmptySpace():
     if not ret or image is None:
         raise ValueError("Không thể đọc khung hình từ camera")
 
-    results = model(image)
+    # Suppress stdout during prediction
+    with suppress_stdout():
+        results = model(image)
 
     empty_space = []
     tmp = []

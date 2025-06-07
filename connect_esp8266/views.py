@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.abspath('D:/Documents/src_py/PBL5/smart_parking/modelAI/license_plate'))
+sys.path.append(os.path.abspath('D:/Documents/Bachelor_in_Vietnam/3rd_Year/2nd Semaster/PBL5/MyProject/parking_v2/modelAI/license_plate'))
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response

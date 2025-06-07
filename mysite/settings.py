@@ -91,9 +91,9 @@ DATABASES = {
     
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'smart_parking',
+        'NAME': 'SmartParking',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': '12345678',
         'HOST': 'localhost',
         'PORT': '3306',
     }
