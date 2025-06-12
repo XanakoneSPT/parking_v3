@@ -59,7 +59,8 @@ def login(request):
     password = request.data.get('password')
     
     # Kiểm tra xem có phải đang đăng nhập với tư cách quản trị viên không
-    if user_id and user_id.lower().startswith('qtv'):
+    if type(user_id) == str and user_id.lower().startswith('qtv'):
+    # if user_id and user_id.lower().startswith('qtv'):
         try:
             quan_tri_vien = QuanTriVien.objects.get(ma_qtv=user_id)
             if quan_tri_vien.mat_khau == password:
