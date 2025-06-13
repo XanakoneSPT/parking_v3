@@ -88,20 +88,28 @@ def nhan_du_lieu_rfid(request):
     )
 
     action = "null"
+    license_plate_detected = False  # Default to False
     if sinh_vien:
         # đi vào
         if sinh_vien.trang_thai != "Đang đỗ":
             bien_so_xe = dectectPlate()
             if bien_so_xe is None:
                 bien_so_xe = "Chưa xác định"
-            lich_su_ra_vao = LichSuRaVao.objects.create(
-                sinh_vien=sinh_vien,
-                bien_so_xe=bien_so_xe,
-                thoi_gian_vao=timezone.now(),
-                thoi_gian_ra=None,
-                trang_thai="Đang đỗ"
-            )
-            sinh_vien.trang_thai = "Đang đỗ"
+                license_plate_detected = False
+            else:
+                license_plate_detected = True
+            
+            # Only create database entries if license plate is detected
+            if license_plate_detected:
+                lich_su_ra_vao = LichSuRaVao.objects.create(
+                    sinh_vien=sinh_vien,
+                    bien_so_xe=bien_so_xe,
+                    thoi_gian_vao=timezone.now(),
+                    thoi_gian_ra=None,
+                    trang_thai="Đang đỗ"
+                )
+                sinh_vien.trang_thai = "Đang đỗ"
+                sinh_vien.save()
             action = "vao"
         # đi ra
         else:
@@ -136,8 +144,7 @@ def nhan_du_lieu_rfid(request):
 
             action = "ra"
             lich_su_ra_vao.save()
-        
-        sinh_vien.save()
+            sinh_vien.save()
 
     # Quét bãi đỗ xe tìm chỗ trống
     emptySpace = None
@@ -152,5 +159,6 @@ def nhan_du_lieu_rfid(request):
     return Response({
         "message": "Dữ liệu thẻ từ đã được xử lý",
         "emptySpace": emptySpace,
-        "action": action
+        "action": action,
+        "license_plate_detected": license_plate_detected
     }, status=status.HTTP_201_CREATED)
